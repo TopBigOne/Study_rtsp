@@ -11,15 +11,17 @@
 #include "net/H264FileMediaSource.h"
 #include "net/H264RtpSink.h"
 
-
+#define aac_test "/home/dev/Documents/RTSP/Study_rtsp/01_h264_rtsp_server/test_file/test.aac"
+#define h264_test "/home/dev/Documents/RTSP/Study_rtsp/01_h264_rtsp_server/test_file/test.aac"
 
 int main(int argc, char* argv[])
 {
     if(argc !=  2)
     {
-        std::cout<<"Usage: "<<argv[0]<<" <h264 file>"<<std::endl;
-        return -1;
+        std::cerr<<"Usage: "<<argv[0]<<" <h264 file>"<<std::endl;
+        // return -1;
     }
+    argv[1] = h264_test;
 
     //Logger::setLogFile("xxx.log");
     Logger::setLogLevel(Logger::LogWarning);

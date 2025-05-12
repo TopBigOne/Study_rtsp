@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-# 声明net模块
+# 声明base模块
 project(base)
 file(GLOB BASE_SOURCES "*.cpp")
 file(GLOB BASE_HEADERS "*.h")

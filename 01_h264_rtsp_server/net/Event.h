@@ -1,7 +1,7 @@
 #ifndef _EVENT_H_
 #define _EVENT_H_
 
-#include "base/Logging.h"
+#include "Logging.h"
 
 typedef void (*EventCallback)(void*);
 
