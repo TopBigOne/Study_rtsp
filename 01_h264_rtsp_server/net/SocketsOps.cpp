@@ -60,6 +60,14 @@ int sockets::accept(int sockfd)
     return connfd;
 }
 
+/**
+ * 从文件描述符分散读取数据到多个缓冲区
+ * egg: 从文件读取数据到3个缓冲区
+ * @param sockfd
+ * @param iov
+ * @param iovcnt
+ * @return
+ */
 int sockets::readv(int sockfd, const struct iovec *iov, int iovcnt)
 {
     return ::readv(sockfd, iov, iovcnt);
@@ -74,6 +82,9 @@ int sockets::sendto(int sockfd, const void* buf, int len,
                         const struct sockaddr *destAddr)
 {
     socklen_t addrLen = sizeof(struct sockaddr);
+    // 标准 UDP 通信（无连接）
+    // 需要动态改变目标地址（如向多个客户端发送数据）。
+    // 广播或多播场景。
     return ::sendto(sockfd, buf, len, 0, destAddr, addrLen);
 }
 
@@ -263,6 +274,7 @@ std::string sockets::getLocalIp()
         {
             if (strcmp(ifreq->ifr_name, "lo") != 0)
             {
+                // 将网络字节序的IP地址转换为点分十进制字符串并返回
                 return inet_ntoa(((struct sockaddr_in*)&(ifreq->ifr_addr))->sin_addr);
             }
             ifreq++;

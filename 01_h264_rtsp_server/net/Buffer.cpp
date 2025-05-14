@@ -14,7 +14,8 @@ int Buffer::read(int fd)
     const int writable = writableBytes();
     vec[0].iov_base = begin()+mWriteIndex;
     vec[0].iov_len = writable;
-    vec[1].iov_base = extrabuf;
+
+    vec[1].iov_base = extrabuf;//
     vec[1].iov_len = sizeof(extrabuf);
     // when there is enough space in this buffer, don't read into extrabuf.
     // when extrabuf is used, we read 128k-1 bytes at most.

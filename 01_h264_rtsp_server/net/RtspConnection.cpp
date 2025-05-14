@@ -82,6 +82,8 @@ void RtspConnection::handleReadBytes()
 
     switch (mMethod)
     {
+        // 客户端发起 RTSP OPTION 请求，目的是得到服务器提供什么方法。
+        // RTSP 提供的方法一般包括 OPTIONS、DESCRIBE、SETUP、TEARDOWN、PLAY、PAUSE、SCALE、GET_PARAMETER
     case OPTIONS:
         if(handleCmdOption() != true)
             goto err;
@@ -354,20 +356,30 @@ bool RtspConnection::parseRequest2(const char* begin, const char* end)
     return false;
 }
 
+/**
+ * 服务器对 RTSP OPTION 回应，服务器实现什么方法就回应哪些方法
+ * @return
+ */
 bool RtspConnection::handleCmdOption()
 {
     snprintf(mBuffer, sizeof(mBuffer),
-            "RTSP/1.0 200 OK\r\n"
-            "CSeq: %u\r\n"
-            "Public: OPTIONS, DESCRIBE, SETUP, TEARDOWN, PLAY\r\n"
-            "\r\n", mCSeq);
+            "RTSP/1.0 200 OK\r\n" // RTSP 响应行(版本号+状态码+状态文本)
+            "CSeq: %u\r\n"              // 序列号头字段(与请求匹配)
+            "Public: OPTIONS, DESCRIBE, SETUP, TEARDOWN, PLAY\r\n" // 支持的 RTSP 方法
+            "\r\n", mCSeq);             // 插入序列号变量值
 
+    // 发送格式化好的 RTSP 响应消息
     if(sendMessage(mBuffer, strlen(mBuffer)) < 0)
         return false;
 
     return true;
 }
 
+/**
+ * 服务器对 RTSP DESCRIBE 响应，发送必要的媒体参数，
+ * 在传输 H.264 文件时，主要包括 SPS/PPS、媒体名、传输协议等信息。
+ * @return
+ */
 bool RtspConnection::handleCmdDescribe()
 {
     MediaSession* session = mRtspServer->loopupMediaSession(mSuffix);
@@ -398,6 +410,11 @@ bool RtspConnection::handleCmdDescribe()
     return true;
 }
 
+/**
+ * 发出相应服务器端的端口号和会话标识符;
+ * 主要包括传输协议和客户端端口号
+ * @return
+ */
 bool RtspConnection::handleCmdSetup()
 {
     char sessionName[100];
@@ -416,6 +433,7 @@ bool RtspConnection::handleCmdSetup()
     if(mTrackId >= MEDIA_MAX_TRACK_NUM || mRtpInstances[mTrackId] || mRtcpInstances[mTrackId])
         return false;
 
+    // case 1: 多播
     if(session->isStartMulticast())
     {
         snprintf((char*)mBuffer, sizeof(mBuffer),
@@ -434,6 +452,7 @@ bool RtspConnection::handleCmdSetup()
     }
     else
     {
+        // case 2-1： tcp
         if(mIsRtpOverTcp) //rtp over tcp
         {
             /* 创建rtp over tcp */
@@ -454,6 +473,7 @@ bool RtspConnection::handleCmdSetup()
         }
         else //rtp over udp
         {
+            // case 2-2: udp
             if(createRtpRtcpOverUdp(mTrackId, mPeerIp, mPeerRtpPort, mPeerRtcpPort) != true)
             {
                 LOG_WARNING("failed to create rtp and rtcp\n");
@@ -569,12 +589,14 @@ bool RtspConnection::createRtpRtcpOverUdp(MediaSession::TrackId trackId, std::st
     int i;
     for(i = 0; i < 10; ++i)
     {
+        // rtp
         rtpSockfd = sockets::createUdpSock();
         if(rtpSockfd < 0)
         {
             return false;
         }
 
+        // rtcp
         rtcpSockfd = sockets::createUdpSock();
         if(rtcpSockfd < 0)
         {

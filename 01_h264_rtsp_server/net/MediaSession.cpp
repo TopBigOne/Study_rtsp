@@ -99,6 +99,7 @@ std::string MediaSession::generateSDPDescription()
     }
 
     mSdp = buf;
+
     return mSdp;
 }
 
@@ -113,17 +114,30 @@ MediaSession::Track* MediaSession::getTrack(MediaSession::TrackId trackId)
     return NULL;
 }
 
+/**
+ * 将 RTP Sink 添加到媒体会话的指定轨道中,用于向该客户端发送 RTP 数据包
+ * @param trackId
+ * @param rtpSink
+ * @return
+ */
 bool MediaSession::addRtpSink(MediaSession::TrackId trackId, RtpSink* rtpSink)
 {
-    Track* track;
+    Track* track;// 声明一个指向 Track 的指针
 
+    // 根据 trackId 获取对应的 Track 对象
     track = getTrack(trackId);
     if(!track)
         return false;
 
+    // 将传入的 rtpSink 赋值给 track 的 mRtpSink 成员变量
     track->mRtpSink = rtpSink;
+    // 将该 track 标记为活跃状态
     track->mIsAlive = true;
 
+    // 设置 RTP Sink 的发送帧回调函数
+    // 参数1: 回调函数指针 sendPacketCallback
+    // 参数2: this 指针（当前 MediaSession 对象）
+    // 参数3: track 指针
     rtpSink->setSendFrameCallback(sendPacketCallback, this, track);
 
     return true;

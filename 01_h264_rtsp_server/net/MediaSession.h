@@ -8,6 +8,9 @@
 
 #define MEDIA_MAX_TRACK_NUM 2
 
+/**
+ * 处理单独的客户会话
+ */
 class MediaSession
 {
 public:

@@ -88,6 +88,7 @@ public:
     }
 
 private:
+    // udp or tcp
     RtpType mRtpType;
     int mSockfd;
     uint16_t mLocalPort; //for udp
