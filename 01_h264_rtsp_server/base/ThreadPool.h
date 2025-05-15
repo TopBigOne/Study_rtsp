@@ -23,7 +23,7 @@ public:
             mTaskCallback = cb;
             mArg = arg;
         }
-// 调用回调函数，执行任务
+      // 调用回调函数，执行任务
         void handle() {
             if (mTaskCallback)
                 mTaskCallback(mArg);

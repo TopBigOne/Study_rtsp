@@ -49,26 +49,35 @@ MediaSession::~MediaSession()
     }
 }
 
+/**
+ * 动态生成一个 SDP 字符串，用于描述媒体会话的配置信息（如支持的媒体类型、传输地址、编解码参数等），主要应用于 RTSP/SDP 协议交互中
+ * @return
+ */
 std::string MediaSession::generateSDPDescription()
 {
-    if(!mSdp.empty())
+    // 避免重复生成 SDP（性能优化）
+    if(!mSdp.empty()){
         return mSdp;
+    }
+
     
     std::string ip = sockets::getLocalIp();
     char buf[2048] = {0};
 
     snprintf(buf, sizeof(buf),
-        "v=0\r\n"
-        "o=- 9%ld 1 IN IP4 %s\r\n"
-        "t=0 0\r\n"
-        "a=control:*\r\n"
-        "a=type:broadcast\r\n",
-        (long)time(NULL), ip.c_str());
+        "v=0\r\n"               // SDP版本号
+        "o=- 9%ld 1 IN IP4 %s\r\n"    // 会话标识：用户名|会话ID|版本|网络类型|地址类型|IP
+        "t=0 0\r\n"                   // 时间范围（0表示持久会话）
+        "a=control:*\r\n"             // 控制URL（*表示使用请求的URL）
+        "a=type:broadcast\r\n",       // 会话类型（广播）
+        (long)time(NULL),       // 用时间戳作为会话ID
+        ip.c_str());
 
+    // 多播模式特殊处理
     if(isStartMulticast())
     {
         snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),
-                "a=rtcp-unicast: reflection\r\n");
+                "a=rtcp-unicast: reflection\r\n");// 支持RTCP单播反射
     }
 
     for(int i = 0; i < MEDIA_MAX_TRACK_NUM; ++i)
@@ -84,6 +93,7 @@ std::string MediaSession::generateSDPDescription()
         snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),
                     "%s\r\n", mTracks[i].mRtpSink->getMediaDescription(port).c_str());
 
+        // 添加连接信息（c=行）
         if(isStartMulticast())
             snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),
                         "c=IN IP4 %s/255\r\n", getMulticastDestAddr().c_str());
@@ -91,9 +101,11 @@ std::string MediaSession::generateSDPDescription()
             snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),
                         "c=IN IP4 0.0.0.0\r\n");
 
+        // 添加媒体属性（a=行，如编解码参数）
         snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),
                     "%s\r\n", mTracks[i].mRtpSink->getAttribute().c_str());
 
+        // 添加控制URL（a=control）
         snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),											
                 "a=control:track%d\r\n", mTracks[i].mTrackId);
     }

@@ -33,12 +33,17 @@ AVFrame* MediaSource::getFrame()
     return frame;
 }
 
+/**
+ * 不需要对AVFrame 的数据，进行擦除吗？
+ * @param frame
+ */
 void MediaSource::putFrame(AVFrame* frame)
 {
     MutexLockGuard mutexLockGuard(mMutex);
 
     mAVFrameInputQueue.push(frame);
-    
+
+    // 这个task 最后会执行到当前类的 taskCallback(),
     mEnv->threadPool()->addTask(mTask);
 }
 
@@ -46,5 +51,6 @@ void MediaSource::putFrame(AVFrame* frame)
 void MediaSource::taskCallback(void* arg)
 {
     MediaSource* source = (MediaSource*)arg;
+    // 实际调用  H264FileMediaSource#readFrame()
     source->readFrame();
 }

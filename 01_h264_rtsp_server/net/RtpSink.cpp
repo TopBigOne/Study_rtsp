@@ -60,6 +60,7 @@ void RtpSink::sendRtpPacket(RtpPacket* packet)
 void RtpSink::timeoutCallback(void* arg)
 {
     RtpSink* rtpSink = (RtpSink*)arg;
+    //  AVFrame* frame = mAVFrameOutputQueue.front();
     AVFrame* frame = rtpSink->mMediaSource->getFrame();
     if(!frame)
     {
@@ -68,6 +69,8 @@ void RtpSink::timeoutCallback(void* arg)
 
     rtpSink->handleFrame(frame);
 
+    // put  到哪里的呢？
+    // mAVFrameInputQueue.push(frame);
     rtpSink->mMediaSource->putFrame(frame);
 }
 
