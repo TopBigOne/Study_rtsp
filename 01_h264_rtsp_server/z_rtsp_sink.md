@@ -1,11 +1,11 @@
 > 要学 Sink ,得先学 [live555](https://github.com/rgaufman/live555)
-> 在 RTSP（Real-Time Streaming Protocol）或基于 RTSP 的流媒体框架（如 Live555）中，**Sink（接收器）**是一个关键的概念，尤其在媒体数据的处理链中
+> 在 RTSP（Real-Time Streaming Protocol）或基于 RTSP 的流媒体框架（如 Live555）中，
+> **Sink（接收器）**是一个关键的概念，尤其在媒体数据的处理链中
 
 
 # Sink 是什么？
 * 在流媒体系统中，Sink 通常是指：
-
-    > 接收并处理媒体数据的组件。
+    > **接收并处理**媒体数据的组件。
 
 * 它的职责是从某个 Source（源） 获取媒体帧（如音频、视频），然后 处理、转发、保存 或 显示 这些数据。
 
@@ -13,15 +13,14 @@
 
 * MediaSink 是一个抽象类，定义了如何处理收到的媒体帧。
 * 常见的派生类有：
-* RTPSink：用于 RTP 打包并发送数据。
-* FileSink：写入文件。
-* DummySink：调试用，仅打印或处理数据但不输出。
-* RTSPClientSink：客户端播放时用来处理接收到的流。
+  * RTPSink：用于 RTP 打包并发送数据。
+  * FileSink：写入文件。
+  * DummySink：调试用，仅打印或处理数据但不输出。
+  * RTSPClientSink：客户端播放时用来处理接收到的流。
 #  Sink 解决了什么问题？
 
 1. 解耦媒体处理流程
    * Sink 将 数据的产生（Source） 和 数据的使用/输出（Sink） 分离，形成清晰的数据流管道。
-
    * Source 负责采集或读取媒体（例：摄像头、文件）。
    * Sink 负责如何处理这些媒体（例：发送、存储、显示）。
    * 这样可以灵活组合，比如：

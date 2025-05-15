@@ -17,9 +17,7 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt);
 ```
 * 参数说明
   * fd: 文件描述符
-
   * iov: 指向 iovec 结构体数组的指针
-
   * iovcnt: iov 数组中的元素个数
 
 * iovec 结构体
@@ -32,11 +30,10 @@ size_t iov_len;   /* 缓冲区长度 */
 ```
 * 返回值
   * 成功时返回写入的总字节数
-
   * 失败时返回 -1 并设置 errno
 
 * 示例
-c
+
 ```c
 struct iovec iov[3];
 char *part1 = "Header: ";
@@ -59,9 +56,7 @@ ssize_t nwritten = writev(fd, iov, 3);
 ### 2. readv() - 分散读取
    * 功能
      * readv() 从文件描述符读取数据并分散存储到多个缓冲区中。
-
 * 函数原型
-
 ```c
 #include <sys/uio.h>
 
